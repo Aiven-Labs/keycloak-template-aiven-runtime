@@ -57,6 +57,16 @@ with username `admin` and the password above.
    `8080`; `KC_PROXY_HEADERS=xforwarded` is already set so Keycloak trusts
    the platform's reverse proxy for scheme/host.
 
+### Application service plan (memory)
+
+Give the `keycloak` application service at least the **`startup-50-1024`**
+plan (1GB RAM). Keycloak's Quarkus JVM needs headroom for metaspace and
+startup augmentation on top of its heap — anything at or below 512MB
+(`startup-20-512`, `startup-10-256`) gets OOM-killed before it can finish
+booting, which shows up as `Killed` in the runtime logs and a Bad Gateway
+from the app's URL. 1GB is the smallest plan that stays up reliably;
+confirmed working in practice.
+
 ### Tightening TLS to the database
 
 By default the parsed `KC_DB_URL` uses whatever `sslmode` Aiven's
