@@ -1,0 +1,27 @@
+services:
+  keycloak:
+    build:
+      context: .
+      dockerfile: Containerfile
+    ports:
+      - "8080:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+      # Aiven Runtime injects this automatically from the postgres service below.
+      # For local docker compose, point it at the postgres service defined here.
+      DATABASE_URL: postgres://keycloak:${POSTGRES_PASSWORD}@postgres:5432/keycloak?sslmode=disable
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - keycloak-postgres-data:/var/lib/postgresql
+
+volumes:
+  keycloak-postgres-data:
